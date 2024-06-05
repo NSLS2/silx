@@ -112,9 +112,16 @@ class TiledBrowser(qt.QMainWindow):
         navigation_layout.addWidget(self.last_page)
         self.navigation_widget.setLayout(navigation_layout)
 
-        # Current path layout
+        # Current path elements
         self.current_path_label = QLabel()
+        self.current_path0 = ClickableQLabel("root")
+        self.current_path_widget = QWidget()
+
+        # Current path layout
+        current_path_layout = QHBoxLayout()
+        current_path_layout.addWidget(self.current_path_label)
         self._rebuild_current_path_label()
+        self.current_path_widget.setLayout(current_path_layout)
 
         # Catalog table elements
         self.catalog_table = QTableWidget(0, 1)
@@ -150,7 +157,7 @@ class TiledBrowser(qt.QMainWindow):
 
         # Catalog table layout
         catalog_table_layout = QVBoxLayout()
-        catalog_table_layout.addWidget(self.current_path_label)
+        catalog_table_layout.addWidget(self.current_path_widget)
         catalog_table_layout.addLayout(catalog_info_layout)
         catalog_table_layout.addWidget(self.navigation_widget)
         catalog_table_layout.addStretch(1)
@@ -388,8 +395,14 @@ class TiledBrowser(qt.QMainWindow):
             self._rebuild()
 
     def _on_last_page_clicked(self):
-        print(self.node_path)
-        print(self.node_path[:-1])
+        while True:
+            if (
+            self._current_page * self._rows_per_page
+            ) + self._rows_per_page < len(self.get_current_node()):
+                self._current_page += 1
+            else:
+                self._rebuild()
+                break
 
     def _set_current_location_label(self):
         starting_index = self._current_page * self._rows_per_page + 1

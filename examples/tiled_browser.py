@@ -93,6 +93,8 @@ class TiledBrowser(qt.QMainWindow):
         self.current_location_label = QLabel()
         self.previous_page = ClickableQLabel("<")
         self.next_page = ClickableQLabel(">")
+        self.first_page = ClickableQLabel("<<")
+        self.last_page = ClickableQLabel(">>")
         self.navigation_widget = QWidget()
 
         self._rows_per_page = int(
@@ -104,8 +106,10 @@ class TiledBrowser(qt.QMainWindow):
         navigation_layout.addWidget(self.rows_per_page_label)
         navigation_layout.addWidget(self.rows_per_page_selector)
         navigation_layout.addWidget(self.current_location_label)
+        navigation_layout.addWidget(self.first_page)
         navigation_layout.addWidget(self.previous_page)
         navigation_layout.addWidget(self.next_page)
+        navigation_layout.addWidget(self.last_page)
         self.navigation_widget.setLayout(navigation_layout)
 
         # Current path layout
@@ -175,6 +179,8 @@ class TiledBrowser(qt.QMainWindow):
         self.connect_button.clicked.connect(self._on_connect_clicked)
         self.previous_page.clicked.connect(self._on_prev_page_clicked)
         self.next_page.clicked.connect(self._on_next_page_clicked)
+        self.first_page.clicked.connect(self._on_first_page_clicked)
+        self.last_page.clicked.connect(self._on_last_page_clicked)
 
         self.rows_per_page_selector.currentTextChanged.connect(
             self._on_rows_per_page_changed
@@ -375,6 +381,15 @@ class TiledBrowser(qt.QMainWindow):
         ) + self._rows_per_page < len(self.get_current_node()):
             self._current_page += 1
             self._rebuild()
+
+    def _on_first_page_clicked(self):
+        if self._current_page != 0:
+            self._current_page = 0
+            self._rebuild()
+
+    def _on_last_page_clicked(self):
+        print(self.node_path)
+        print(self.node_path[:-1])
 
     def _set_current_location_label(self):
         starting_index = self._current_page * self._rows_per_page + 1

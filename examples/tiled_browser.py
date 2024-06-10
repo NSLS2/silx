@@ -299,6 +299,29 @@ class TiledBrowser(qt.QMainWindow):
         self.info_box.setText("")
         self.load_button.setEnabled(False)
 
+    def _on_breadcrumb_clicked(self, node):
+        # If root is selected.
+        if node == "root":
+            self.node_path = ()
+            self._rebuild()
+        
+        # For any node other than root.
+        else:
+            try:
+                index = self.node_path.index(node)
+                self. node_path = self.node_path[:index + 1]
+                self._rebuild()
+            
+            # If node ID has been truncated.
+            except ValueError:
+                for i, node_id in enumerate(self.node_path):
+                    if node == node_id[:self.NODE_ID_MAXLEN - 3] + "...":
+                        index = i
+                        break
+                
+                self.node_path = self.node_path[:index + 1]
+                self._rebuild()
+
     def _clear_current_path_layout(self):
         for i in reversed(range(self.current_path_layout.count())):
             widget = self.current_path_layout.itemAt(i).widget()
@@ -307,7 +330,8 @@ class TiledBrowser(qt.QMainWindow):
 
     def _rebuild_current_path_layout(self):
         # Add root to widget list.
-        root = ClickableQLabel("root")
+        root = ClickableQLabelWithText("root")
+        root.clicked_with_text.connect(self._on_breadcrumb_clicked)
         widgets = [root]
         
         # Appropriately shorten node_id.
@@ -316,8 +340,8 @@ class TiledBrowser(qt.QMainWindow):
                 node_id = node_id[: self.NODE_ID_MAXLEN - 3] + "..."  
 
             # Convert node_id into a ClickableQWidget and add to widget list.
-            clickable_label = ClickableQLabel(node_id)
-            clickable_label.clicked.connect(self._on_item_double_click) # TODO: Find correct argument for method
+            clickable_label = ClickableQLabelWithText(node_id)
+            clickable_label.clicked_with_text.connect(self._on_breadcrumb_clicked) # TODO: Find correct argument for method
             widgets.append(clickable_label)
 
         # Add nodes to node path.
@@ -332,7 +356,7 @@ class TiledBrowser(qt.QMainWindow):
             while len(self.current_path_layout) < len(widgets):
                 for widget in widgets:
                     self.current_path_layout.addWidget(widget)
-         
+
     def _rebuild_table(self):
         prev_block = self.catalog_table.blockSignals(True)
         # Remove all rows first
@@ -447,6 +471,15 @@ class ClickableQLabel(QLabel):
 
     def mousePressEvent(self, event):
         self.clicked.emit()
+
+class ClickableQLabelWithText(ClickableQLabel):
+    # Define a new signal that emits the text of the label when clicked
+    clicked_with_text = Signal(str)
+
+    def mousePressEvent(self, event):
+        # Emit the oringal clicked signal
+        super().mousePressEvent(event)
+        self.clicked_with_text.emit(self.text())
 
 
 def main():

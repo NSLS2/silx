@@ -91,9 +91,9 @@ class TiledBrowser(qt.QMainWindow):
         self.rows_per_page_selector.setCurrentIndex(0)
 
         self.current_location_label = QLabel()
+        self.first_page = ClickableQLabel("<<")
         self.previous_page = ClickableQLabel("<")
         self.next_page = ClickableQLabel(">")
-        self.first_page = ClickableQLabel("<<")
         self.last_page = ClickableQLabel(">>")
         self.navigation_widget = QWidget()
 
@@ -330,7 +330,7 @@ class TiledBrowser(qt.QMainWindow):
 
     def _rebuild_current_path_layout(self):
         # Add root to widget list.
-        root = ClickableQLabelWithText("root")
+        root = ClickableQLabel("root")
         root.clicked_with_text.connect(self._on_breadcrumb_clicked)
         widgets = [root]
         
@@ -340,8 +340,8 @@ class TiledBrowser(qt.QMainWindow):
                 node_id = node_id[: self.NODE_ID_MAXLEN - 3] + "..."  
 
             # Convert node_id into a ClickableQWidget and add to widget list.
-            clickable_label = ClickableQLabelWithText(node_id)
-            clickable_label.clicked_with_text.connect(self._on_breadcrumb_clicked) # TODO: Find correct argument for method
+            clickable_label = ClickableQLabel(node_id)
+            clickable_label.clicked_with_text.connect(self._on_breadcrumb_clicked)
             widgets.append(clickable_label)
 
         # Add nodes to node path.
@@ -468,17 +468,10 @@ class TiledBrowser(qt.QMainWindow):
 
 class ClickableQLabel(QLabel):
     clicked = Signal()
-
-    def mousePressEvent(self, event):
-        self.clicked.emit()
-
-class ClickableQLabelWithText(ClickableQLabel):
-    # Define a new signal that emits the text of the label when clicked
     clicked_with_text = Signal(str)
 
     def mousePressEvent(self, event):
-        # Emit the oringal clicked signal
-        super().mousePressEvent(event)
+        self.clicked.emit()
         self.clicked_with_text.emit(self.text())
 
 

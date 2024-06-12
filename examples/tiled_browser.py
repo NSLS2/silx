@@ -10,6 +10,7 @@ import collections
 from datetime import date, datetime
 import functools
 import json
+import numpy as np
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon, QPixmap
@@ -238,11 +239,19 @@ class TiledBrowser(qt.QMainWindow):
             print(f"Cannot open type: '{family}'")
             return
         if family == StructureFamily.array:
-            plot = self.getPlotWidget()
-            plot.clear()
-            plot.getDefaultColormap().setName("viridis")
-            plot.addImage(node)
-            plot.resetZoom()
+            if node.ndim == 1:
+                node = node[:, np.newaxis]
+                plot = self.getPlotWidget()
+                plot.clear()
+                plot.getDefaultColormap().setName("viridis")
+                plot.addImage(node)
+                plot.resetZoom()
+            else:
+                plot = self.getPlotWidget()
+                plot.clear()
+                plot.getDefaultColormap().setName("viridis")
+                plot.addImage(node)
+                plot.resetZoom()
         elif family == StructureFamily.container:
             self.enter_node(node_id)
         else:

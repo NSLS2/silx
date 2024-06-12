@@ -232,6 +232,13 @@ class TiledBrowser(qt.QMainWindow):
         self._current_page = 0
         self._rebuild()
 
+    def generate_plot(self, node):
+        plot = self.getPlotWidget()
+        plot.clear()
+        plot.getDefaultColormap().setName("viridis")
+        plot.addImage(node)
+        plot.resetZoom()
+
     def open_node(self, node_id):
         node = self.get_current_node()[node_id]
         family = node.item["attributes"]["structure_family"]
@@ -241,17 +248,9 @@ class TiledBrowser(qt.QMainWindow):
         if family == StructureFamily.array:
             if node.ndim == 1:
                 node = node[:, np.newaxis]
-                plot = self.getPlotWidget()
-                plot.clear()
-                plot.getDefaultColormap().setName("viridis")
-                plot.addImage(node)
-                plot.resetZoom()
+                self.generate_plot(node)
             else:
-                plot = self.getPlotWidget()
-                plot.clear()
-                plot.getDefaultColormap().setName("viridis")
-                plot.addImage(node)
-                plot.resetZoom()
+               self.generate_plot(node)
         elif family == StructureFamily.container:
             self.enter_node(node_id)
         else:

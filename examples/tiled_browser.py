@@ -252,13 +252,12 @@ class TiledBrowser(qt.QMainWindow):
                 self.generate_plot(node)
             elif node.ndim > 3:
                 # Convert DaskArrayClient Object to Dask Array.
-                node_arr = node.compute()
-                node = da.from_array(node_arr)
+                #node_arr = node.compute()
+                #node = da.from_array(node_arr)
                 
                 # Determine dimensions of array an which to slice.
                 num_dims = node.ndim
                 slicing_indices = tuple([0] * (num_dims - 3) + [slice(None)] * 3)
-                print(slicing_indices)
 
                 # Convert array to three dimensions and plot data.
                 node_3d = node[slicing_indices]

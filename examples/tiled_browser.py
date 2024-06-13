@@ -11,6 +11,7 @@ from datetime import date, datetime
 import functools
 import json
 import numpy as np
+import dask.array as da
 
 from qtpy.QtCore import Qt, Signal
 from qtpy.QtGui import QIcon, QPixmap
@@ -249,6 +250,23 @@ class TiledBrowser(qt.QMainWindow):
             if node.ndim == 1:
                 node = node[:, np.newaxis]
                 self.generate_plot(node)
+            elif node.ndim > 3:
+                # Convert DaskArrayClient Object to Dask Array.
+                node_arr = node.compute()
+                node = da.from_array(node_arr)
+                
+                # Determine dimensions of array an which to slice.
+                num_dims = node.ndim
+                slicing_indices = tuple([0] * (num_dims - 3) + [slice(None)] * 3)
+                print(slicing_indices)
+
+                # Convert array to three dimensions and plot data.
+                node_3d = node[slicing_indices]
+                try:
+                    self.generate_plot(node_3d)
+                except ValueError:
+                    print("RGB(A) image is expected to have 3" 
+                          "or 4 elements as last dimension. Got too many")
             else:
                self.generate_plot(node)
         elif family == StructureFamily.container:
